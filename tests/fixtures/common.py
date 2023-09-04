@@ -1,6 +1,5 @@
 import os
 from unittest.mock import AsyncMock
-
 import pytest
 from aiohttp.test_utils import TestClient, loop_context
 
@@ -24,7 +23,6 @@ def server():
     )
     app.on_startup.clear()
     app.on_shutdown.clear()
-    app.on_cleanup.clear()
     app.store.vk_api = AsyncMock()
     app.store.vk_api.send_message = AsyncMock()
     app.on_startup.append(app.store.admins.connect)
@@ -56,7 +54,7 @@ def cli(aiohttp_client, loop, server) -> TestClient:
 async def authed_cli(cli, config) -> TestClient:
     await cli.post(
         "/admin.login",
-        json={
+        data={
             "email": config.admin.email,
             "password": config.admin.password,
         },

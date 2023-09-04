@@ -1,5 +1,4 @@
 import typing
-
 from app.admin.views import AdminCurrentView
 
 if typing.TYPE_CHECKING:
