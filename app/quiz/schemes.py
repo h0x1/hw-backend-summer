@@ -2,6 +2,7 @@ from marshmallow import Schema, fields, post_load, validates, ValidationError
 
 
 class ThemeSchema(Schema):
+    id = fields.Int(required=False)
     title = fields.Str(required=True)
 
 
@@ -13,12 +14,16 @@ class ThemeResponseSchema(ThemeSchema):
     id = fields.Int(required=True)
 
 
+class ThemeListSchema(Schema):
+    themes = fields.Nested(ThemeSchema, many=True)
+
+
 class ThemeListResponseSchema(Schema):
     themes = fields.Nested(ThemeResponseSchema, many=True)
 
 
 class ThemeIdSchema(Schema):
-    pass
+    theme_id = fields.Int()
 
 
 class AnswerSchema(Schema):
@@ -27,9 +32,10 @@ class AnswerSchema(Schema):
 
 
 class QuestionSchema(Schema):
+    id = fields.Int(required=False)
     title = fields.Str(required=True)
     theme_id = fields.Int(required=True)
-    answers = fields.Nested(AnswerSchema, many=True)
+    answers = fields.Nested(AnswerSchema, many=True, required=True)
 
 
 class QuestionRequestSchema(QuestionSchema):
@@ -47,6 +53,8 @@ class QuestionRequestSchema(QuestionSchema):
 class QuestionResponseSchema(QuestionSchema):
     id = fields.Int(required=True)
 
+class ListQuestionSchema(Schema):
+    questions = fields.Nested(QuestionSchema, many=True)
 
 class QuestionListResponseSchema(Schema):
     questions = fields.Nested(QuestionResponseSchema, many=True)

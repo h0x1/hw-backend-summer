@@ -1,28 +1,33 @@
 from dataclasses import dataclass, field
 
-from app.admin.models import Admin
-from app.quiz.models import Theme, Question
-
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
+from typing import Optional
 
 @dataclass
 class Database:
-    admins: list[Admin] = field(default_factory=list)
-    questions: list[Question] = field(default_factory=list)
-    themes: list[Theme] = field(default_factory=list)
+    def __init__(self, app: "Application"):
+        self.app = app
+        self._engine: Optional[AsyncEngine] = None
+        self._db: Optional[declarative_base] = None
+        self.session: Optional[AsyncSession] = None
 
-    @property
-    def next_theme_id(self) -> int:
-        return len(self.themes) + 1
+    async def connect(self, *_: list, **__: dict) -> None:
+        self._db = db
+        self._engine = create_async_engine(
+            f"postgresql+asyncpg://{self.app.config.database.user}:{self.app.config.database.password}"
+            f"@{self.app.config.database.host}/{self.app.config.database.database}",
+            echo=True,
+            future=True
+        )
+        self.session = sessionmaker(
+            self._engine,
+            expire_on_commit=False,
+            class_=AsyncSession
+        )
 
-    @property
-    def next_question_id(self) -> int:
-        return len(self.questions) + 1
-
-    @property
-    def next_admins_id(self) -> int:
-        return len(self.admins) + 1
-
-    def clear(self):
-        self.themes.clear()
-        self.admins.clear()
-        self.questions.clear()
+    async def disconnect(self, *_: list, **__: dict) -> None:
+        try:
+            await self._engine.dispose()
+        except Exception:
+            pass
