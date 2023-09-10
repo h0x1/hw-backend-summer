@@ -5,7 +5,6 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 from app.store.database import db
 from typing import Optional
 
-@dataclass
 class Database:
     def __init__(self, app: "Application"):
         self.app = app
