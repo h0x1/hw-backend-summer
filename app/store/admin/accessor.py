@@ -2,8 +2,9 @@ import base64
 import typing
 from hashlib import sha256
 from typing import Optional
-
+from sqlalchemy import select
 from app.base.base_accessor import BaseAccessor
+from app.admin.models import Admin, AdminModel
 from app.admin.models import Admin
 import bcrypt
 
@@ -12,21 +13,27 @@ if typing.TYPE_CHECKING:
 
 
 class AdminAccessor(BaseAccessor):
-    async def connect(self, app: "Application"):
-        first_admin = await self.create_admin(app.config.admin.email, app.config.admin.password)
-        self.app.database.admins.append(first_admin)
-
-    async def get_by_email(self, email: str) -> Optional[Admin]:
-        for admin in self.app.database.admins:
-            if admin.email == email:
-                return admin
-        return None
+    async def get_by_email(self, email: str) -> Admin | None:
+        async with self.app.database.session() as session:
+            admin = (await session.execute(
+                select(AdminModel)
+                .where(AdminModel.email == email)
+            )).scalar()
+        if not admin:
+            return
+        return admin.to_dc()
 
     async def create_admin(self, email: str, password: str) -> Admin:
-        return Admin(self.app.database.next_admins_id, email, self._password_hasher(password))
-
+        async with self.app.database.session.begin() as session:
+            new_admin = AdminModel(email=email, password=self._password_hasher(password))
+            session.add(new_admin)
+            return new_admin.to_dc()
+        
     @staticmethod
     def _password_hasher(raw_password: str) -> str:
         hash_binary = bcrypt.hashpw(raw_password.encode('utf-8'), bcrypt.gensalt())
         encoded = base64.b64encode(hash_binary)
         return encoded.decode('utf-8')
+
+
+
