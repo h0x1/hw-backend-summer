@@ -19,7 +19,9 @@ class UpdateMessage:
 
 @dataclass
 class UpdateObject:
-    message: UpdateMessage
+    id: int
+    user_id: int
+    body: str
 
 
 @dataclass
