@@ -1,5 +1,5 @@
 import typing
-
+from logging import getLogger
 from app.store.vk_api.dataclasses import Update, Message
 
 if typing.TYPE_CHECKING:
