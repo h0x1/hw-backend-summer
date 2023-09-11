@@ -1,6 +1,6 @@
 import typing
 
-
+from app.store.bot.manager import BotManager
 from app.store.database.database import Database
 
 if typing.TYPE_CHECKING:
@@ -9,7 +9,6 @@ if typing.TYPE_CHECKING:
 
 class Store:
     def __init__(self, app: "Application"):
-        from app.store.bot.manager import BotManager
         from app.store.quiz.accessor import QuizAccessor
         from app.store.vk_api.accessor import VkApiAccessor
         from app.store.admin.accessor import AdminAccessor
